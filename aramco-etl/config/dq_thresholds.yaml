@@ -1,0 +1,20 @@
+# Data quality gate thresholds enforced between CURATED -> BDH -> ADL.
+# A layer promotion is blocked (Airflow task fails / branches to alert) when
+# the computed pass rate for a dataset drops below its configured minimum.
+gates:
+  bdh:
+    fact_production_daily: 98.0
+    fact_equipment_downtime: 97.0
+    fact_maintenance_workorder: 97.0
+    fact_pipeline_flow: 98.5
+    fact_refinery_yield: 98.0
+    fact_hse_incident: 99.0
+    fact_financial_actuals: 99.0
+    default: 97.0
+  adl:
+    default: 99.0
+
+severity_actions:
+  REJECT: "Row excluded from target table and written to the reject/error sink."
+  WARN: "Row proceeds to target table; violation logged for follow-up."
+  AUTO_CORRECT: "Value corrected in-flight (e.g. unit normalisation); correction logged."
