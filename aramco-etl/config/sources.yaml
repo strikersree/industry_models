@@ -1,0 +1,86 @@
+# Source system registry for the CURATED (Bronze) layer.
+# Each source lands in its own Spark database/schema so that access control,
+# retention, and schema evolution can be managed independently per source.
+sources:
+
+  scada_upstream:
+    description: "Upstream well & field telemetry (SCADA / OSIsoft PI historian)"
+    curated_schema: curated_scada_upstream
+    landing_path: "${LANDING_ROOT}/scada_upstream"
+    format: json
+    ingestion_mode: append
+    business_domain: upstream
+    tables:
+      - raw_well_production_reading
+      - raw_field_header_pressure
+      - raw_wellhead_events
+
+  maximo_eam:
+    description: "Enterprise Asset Management (IBM Maximo) - assets, work orders, downtime"
+    curated_schema: curated_maximo_eam
+    landing_path: "${LANDING_ROOT}/maximo_eam"
+    format: csv
+    ingestion_mode: merge
+    business_domain: maintenance
+    tables:
+      - raw_asset_master
+      - raw_work_order
+      - raw_downtime_event
+
+  sap_erp:
+    description: "SAP ERP - finance, procurement, cost center actuals"
+    curated_schema: curated_sap_erp
+    landing_path: "${LANDING_ROOT}/sap_erp"
+    format: parquet
+    ingestion_mode: append
+    business_domain: finance
+    tables:
+      - raw_gl_journal
+      - raw_purchase_order
+      - raw_cost_center_actuals
+
+  pipeline_scada:
+    description: "Midstream pipeline SCADA - flow, pressure, leak detection"
+    curated_schema: curated_pipeline_scada
+    landing_path: "${LANDING_ROOT}/pipeline_scada"
+    format: json
+    ingestion_mode: append
+    business_domain: midstream
+    tables:
+      - raw_pipeline_flow_reading
+      - raw_leak_detection_alarm
+
+  refinery_lims:
+    description: "Downstream refinery LIMS - crude assay & product quality"
+    curated_schema: curated_refinery_lims
+    landing_path: "${LANDING_ROOT}/refinery_lims"
+    format: csv
+    ingestion_mode: append
+    business_domain: downstream
+    tables:
+      - raw_crude_assay
+      - raw_product_quality_test
+
+  hse:
+    description: "Health, Safety & Environment - incidents and safety observations"
+    curated_schema: curated_hse
+    landing_path: "${LANDING_ROOT}/hse"
+    format: json
+    ingestion_mode: append
+    business_domain: hse
+    tables:
+      - raw_incident_report
+      - raw_safety_observation
+
+layers:
+  bronze:
+    alias: curated
+    description: "Raw, source-shaped data. One schema per source system. No business logic."
+  silver:
+    alias: bdh
+    description: "Business Data Hub - conformed dimensions/facts, SCD2, DQ-gated."
+    schema: bdh
+  gold:
+    alias: adl
+    description: "Analytics Data Layer - curated KPI marts for BI / reporting consumption."
+    schema: adl
