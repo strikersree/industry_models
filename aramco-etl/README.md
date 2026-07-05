@@ -169,6 +169,10 @@ Failure handling mirrors the "halt the batch below threshold" pattern: a DQ-gate
 
 ---
 
+## Local Development
+
+See [`LOCAL_SETUP.md`](./LOCAL_SETUP.md) for generating synthetic sample data, running the full pipeline in-process without Airflow (`scripts/run_local_pipeline.py`), and wiring the DAGs into a local Airflow standalone install.
+
 ## Deployment
 
 **Prerequisites:**
@@ -216,7 +220,7 @@ pip install -r requirements.txt
 pytest
 ```
 
-Unit tests (`tests/`) run against a local, non-Hive Spark session with Delta Lake enabled (no external metastore required) and cover the reusable engine pieces: the DQ rule engine (`test_data_quality.py`), the SCD2 merge (`test_scd2.py`), and the Type-1 dimension upsert (`test_type1_dim.py`). Full curated -> BDH -> ADL integration is best exercised against a real dev data lake with sample landing files, since the fact/mart builders read/write named catalog tables across multiple schemas.
+Unit tests (`tests/`) run against a local, non-Hive Spark session with Delta Lake enabled (no external metastore required) and cover the reusable engine pieces: the DQ rule engine (`test_data_quality.py`), the SCD2 merge (`test_scd2.py`), and the Type-1 dimension upsert (`test_type1_dim.py`). For full curated -> BDH -> ADL integration testing against synthetic sample data, see [`LOCAL_SETUP.md`](./LOCAL_SETUP.md).
 
 ---
 

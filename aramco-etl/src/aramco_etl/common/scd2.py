@@ -23,7 +23,14 @@ from pyspark.sql import DataFrame, SparkSession, functions as F
 HIGH_DATE = "9999-12-31"
 
 
-def _with_change_hash(df: DataFrame, tracked_columns: List[str]) -> DataFrame:
+def with_change_hash(df: DataFrame, tracked_columns: List[str]) -> DataFrame:
+    """Adds a `change_hash` column. NULL tracked columns are coalesced to ''
+    before concatenation -- callers seeding a dimension for the first time
+    MUST use this same helper rather than reimplementing the hash, or a
+    later `apply_scd2` call will see every NULL-containing row as "changed"
+    the moment a real SCD2 comparison runs (concat_ws silently drops NULL
+    arguments instead of leaving a placeholder, so a hand-rolled version of
+    this without the coalesce produces a different hash for the same row)."""
     return df.withColumn(
         "change_hash",
         F.sha2(F.concat_ws("||", *[F.coalesce(F.col(c).cast("string"), F.lit("")) for c in tracked_columns]), 256),
@@ -46,7 +53,7 @@ def apply_scd2(
     historical batches out of chronological order.
     """
     effective_date_expr = F.to_date(F.lit(as_of_date)) if as_of_date else F.current_date()
-    source_hashed = _with_change_hash(source_df, tracked_columns)
+    source_hashed = with_change_hash(source_df, tracked_columns)
 
     target = DeltaTable.forName(spark, target_table)
     current_rows = target.toDF().filter(F.col("current_row_flag") == "Y")

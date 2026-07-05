@@ -13,7 +13,7 @@ import argparse
 from pyspark.sql import Window, functions as F
 
 from aramco_etl.common.logging_utils import get_logger, job_run
-from aramco_etl.common.scd2 import apply_scd2
+from aramco_etl.common.scd2 import apply_scd2, with_change_hash
 from aramco_etl.common.spark_session import get_spark_session
 
 logger = get_logger("bdh.build_dim_asset")
@@ -46,7 +46,7 @@ def build_dim_asset(business_date: str, run_id: str) -> None:
 
         if not spark.catalog.tableExists("bdh.dim_asset") or spark.table("bdh.dim_asset").isEmpty():
             seeded = (
-                source.withColumn("change_hash", F.sha2(F.concat_ws("||", *TRACKED_COLUMNS), 256))
+                with_change_hash(source, TRACKED_COLUMNS)
                 .withColumn("asset_sk", F.row_number().over(Window.orderBy("asset_id")).cast("bigint"))
                 .withColumn("row_eff_date", F.to_date(F.lit(business_date)))
                 .withColumn("row_exp_date", F.to_date(F.lit("9999-12-31")))

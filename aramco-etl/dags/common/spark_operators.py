@@ -6,13 +6,20 @@ cluster configuration.
 """
 from __future__ import annotations
 
+import os
 from typing import List
 
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 
 SPARK_CONN_ID = "spark_default"
-SRC_ROOT = "/opt/airflow/aramco-etl/src"
-PROPERTIES_FILE = "/opt/airflow/aramco-etl/config/spark-defaults.conf"
+
+# Set ARAMCO_REPO_ROOT in the Airflow scheduler/webserver environment to point
+# at wherever this repo is checked out (e.g. a local Airflow install: export
+# ARAMCO_REPO_ROOT=/Users/you/path/to/aramco-etl). Falls back to a container
+# path for the reference containerized deployment layout.
+REPO_ROOT = os.environ.get("ARAMCO_REPO_ROOT", "/opt/airflow/aramco-etl")
+SRC_ROOT = f"{REPO_ROOT}/src"
+PROPERTIES_FILE = f"{REPO_ROOT}/config/spark-defaults.conf"
 DELTA_PACKAGE = "io.delta:delta-spark_2.12:3.1.0"
 
 

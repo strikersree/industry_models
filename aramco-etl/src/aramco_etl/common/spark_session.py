@@ -12,8 +12,27 @@ from pyspark.sql import SparkSession
 from aramco_etl.common.config import Environment
 
 
-def get_spark_session(app_name: str, enable_hive_support: bool = False) -> SparkSession:
+def get_spark_session(app_name: str, enable_hive_support: bool = True) -> SparkSession:
+    """
+    `enable_hive_support` defaults to True because every job here is meant to
+    be launched as its own `spark-submit` process (that's what Airflow's
+    SparkSubmitOperator does). Without a persistent metastore, Spark's
+    default catalog is an in-memory, per-JVM registry: a database/table
+    created by one process is invisible to the next spark-submit -- the
+    Delta *files* on disk survive, but nothing knows they're a table named
+    `bdh.dim_asset` anymore. Hive support with no external metastore
+    configured falls back to a local embedded Derby metastore, which *does*
+    persist across process restarts. We pin its location under
+    DATALAKE_ROOT so it doesn't depend on the launching process's cwd.
+
+    Caveat: the embedded Derby metastore only tolerates one JVM at a time.
+    A real deployment (or anything needing concurrent Spark jobs, e.g. the
+    parallel task groups in the BDH/ADL DAGs) should point Hive at a real
+    external metastore (Glue, Unity Catalog, a Postgres-backed Hive
+    metastore, ...) instead of relying on this embedded fallback.
+    """
     env = Environment.from_env()
+    metastore_dir = f"{env.datalake_root}/metastore_db"
 
     builder = (
         SparkSession.builder.appName(app_name)
@@ -25,7 +44,14 @@ def get_spark_session(app_name: str, enable_hive_support: bool = False) -> Spark
     )
 
     if enable_hive_support:
-        builder = builder.enableHiveSupport()
+        # Bare "javax.jdo.option.ConnectionURL" is silently dropped by
+        # SparkSession.Builder.config() (it only forwards "spark.*" keys) --
+        # the "spark.hadoop." prefix is required for it to reach Hive's
+        # metastore configuration.
+        builder = builder.config(
+            "spark.hadoop.javax.jdo.option.ConnectionURL",
+            f"jdbc:derby:;databaseName={metastore_dir};create=true",
+        ).enableHiveSupport()
 
     # No-op when spark-submit already put the Delta jars on the classpath via
     # --packages; resolves them via Maven when running the driver directly

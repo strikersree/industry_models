@@ -6,3 +6,5 @@ metastore_db/
 derby.log
 .ivy2/
 *.egg-info/
+.venv/
+aramco_data/
