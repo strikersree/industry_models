@@ -5,7 +5,7 @@
 
 ## Overview
 
-This repository contains the complete SQL and ETL script suite for the **Saudi Telecom Corporation (STC) Enterprise Data Warehouse**, built on the **TM Forum TMF 622 Product Ordering Management** standard. The solution implements a Kimball-methodology dimensional data warehouse on **Teradata EDW**, with an **Ab Initio** ETL pipeline orchestrating end-to-end data ingestion, transformation, quality validation, and mart delivery.
+This repository contains the complete SQL and ETL script suite for the ** Telecom Corporation (TC) Enterprise Data Warehouse**, built on the **TM Forum TMF 622 Product Ordering Management** standard. The solution implements a Kimball-methodology dimensional data warehouse on **Teradata EDW**, with an **Ab Initio** ETL pipeline orchestrating end-to-end data ingestion, transformation, quality validation, and mart delivery. This repository is just an sample and does not reflect the any real Telecom corporation
 
 | Attribute | Detail |
 |---|---|
@@ -338,11 +338,10 @@ Step 6:  06_STC_ANALYTICS.sql    ← Creates operational views; run queries ad-h
 
 | Role | Team |
 |---|---|
-| **Solution Owner** | STC Enterprise Data Architecture & Analytics Division |
+| **Solution Owner** | Enterprise Data Architecture & Analytics Division |
 | **ETL Development** | Data Engineering Squad — Ab Initio CoE |
-| **Data Governance** | STC Data Governance Council |
-| **Regulatory** | STC Legal & Compliance (CITC / ZATCA / PDPL) |
+| **Data Governance** | Data Governance Council |
+| **Regulatory** | Legal & Compliance (CITC / ZATCA / PDPL) |
 
 ---
 
-*© 2025 Saudi Telecom Corporation (STC). All Rights Reserved. This document is the intellectual property of STC. Unauthorised reproduction or distribution is strictly prohibited.*
