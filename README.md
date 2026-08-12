@@ -1,5 +1,5 @@
-# STC Enterprise Data Warehouse — TMF 622 Product Ordering
-### Ab Initio ETL Framework | Teradata EDW | Saudi Telecom Corporation
+# Enterprise Data Warehouse — TMF 622 Product Ordering
+### Ab Initio ETL Framework | Teradata EDW | Telecom Corporation
 
 ---
 
